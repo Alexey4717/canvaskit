@@ -8,4 +8,5 @@ export const buildConfig = (isBuild: boolean): UserConfig['build'] => ({
   emptyOutDir: true,
   minify: isBuild ? 'esbuild' : false,
   reportCompressedSize: isBuild,
+  chunkSizeWarningLimit: 550,
 });

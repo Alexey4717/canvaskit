@@ -8,5 +8,7 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const resolveConfig: UserConfig['resolve'] = {
   alias: {
     '@': path.resolve(projectRoot, 'src'),
+    fs: path.resolve(projectRoot, 'config/shims/fs-browser.cjs'),
+    path: path.resolve(projectRoot, 'config/shims/path-browser.cjs'),
   },
 };
