@@ -2,7 +2,7 @@
 
 :root {
   font-family:
-    Inter,
+    Arial,
     system-ui,
     -apple-system,
     Segoe UI,
@@ -12,26 +12,12 @@
 
 body {
   min-height: 100vh;
-  color: #e5e7eb;
-  background: #0f172a;
+  color: #111827;
+  background: #e3e3e3;
 }
 
 .app {
-  max-width: 920px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 48px 20px;
-}
-
-h1 {
-  margin: 0 0 16px;
-  font-size: 32px;
-}
-
-p {
-  color: #cbd5e1;
-}
-
-.status {
-  margin-top: 16px;
-  color: #86efac;
+  padding: 64px 28px;
 }
