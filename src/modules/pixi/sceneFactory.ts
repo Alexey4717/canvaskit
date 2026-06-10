@@ -11,66 +11,88 @@ const bindDebugPointerEvents = (displayObject: PIXI.DisplayObject, name: string)
   });
 };
 
-const createDemoSprite = (): PIXI.Sprite => {
+const DEMO_IMAGE_URL = '/images/reference-photo.jpg';
+
+const createFallbackTexture = (): PIXI.Texture => {
   const sourceCanvas = document.createElement('canvas');
-  sourceCanvas.width = 96;
-  sourceCanvas.height = 56;
+  sourceCanvas.width = 120;
+  sourceCanvas.height = 70;
 
   const context = sourceCanvas.getContext('2d');
   if (context) {
-    context.fillStyle = '#e2e8f0';
+    context.fillStyle = '#d9dce1';
     context.fillRect(0, 0, sourceCanvas.width, sourceCanvas.height);
-    context.fillStyle = '#94a3b8';
-    context.fillRect(8, 10, 30, 16);
-    context.fillStyle = '#64748b';
-    context.fillRect(42, 20, 46, 24);
-    context.fillStyle = '#0f172a';
-    context.font = '12px sans-serif';
-    context.fillText('PNG', 34, 36);
+    context.fillStyle = '#a3aab5';
+    context.fillRect(10, 10, 44, 20);
+    context.fillStyle = '#7a8699';
+    context.fillRect(58, 18, 52, 30);
+    context.fillStyle = '#141922';
+    context.font = 'bold 14px sans-serif';
+    context.fillText('PNG', 44, 44);
   }
 
-  const sprite = PIXI.Sprite.from(sourceCanvas.toDataURL('image/png'));
+  return PIXI.Texture.from(sourceCanvas.toDataURL('image/png'));
+};
+
+const createDemoSprite = (): PIXI.Sprite => {
+  const sprite = new PIXI.Sprite(createFallbackTexture());
   sprite.anchor.set(0.5);
-  sprite.position.set(160, 130);
-  sprite.scale.set(1.35, 1.35);
+  sprite.position.set(168, 135);
+  sprite.width = 106;
+  sprite.height = 58;
   bindDebugPointerEvents(sprite, 'sprite');
+
+  const imageTexture = PIXI.Texture.from(DEMO_IMAGE_URL);
+  if (imageTexture.baseTexture.valid) {
+    sprite.texture = imageTexture;
+    sprite.width = 106;
+    sprite.height = 58;
+  } else {
+    imageTexture.baseTexture.once('loaded', () => {
+      sprite.texture = imageTexture;
+      sprite.width = 106;
+      sprite.height = 58;
+    });
+  }
 
   return sprite;
 };
 
 export const createInitialScene = (): PIXI.Container => {
   const mainContainer = new PIXI.Container();
-  const subContainer = new PIXI.Container();
+  const line = new PIXI.Graphics();
+  const triangle = new PIXI.Graphics();
+  const hexagon = new PIXI.Graphics();
+  const greenRect = new PIXI.Graphics();
 
-  const g1 = new PIXI.Graphics();
-  const g2 = new PIXI.Graphics();
-  const g3 = new PIXI.Graphics();
-  const g4 = new PIXI.Graphics();
+  line.lineStyle(4, '#141414', 1).moveTo(0, 0).lineTo(130, -30);
+  line.position.set(122, 96);
+  bindDebugPointerEvents(line, 'line');
 
-  g1.beginFill('#ff0000').drawEllipse(0, 0, 80, 42).endFill();
-  g1.position.set(178, 88);
-  g1.angle = 30;
-  bindDebugPointerEvents(g1, 'g1');
+  triangle
+    .beginFill('#f4a580')
+    .lineStyle(2, '#141414', 0.35)
+    .drawPolygon([0, 34, 18, -24, 36, 34])
+    .endFill();
+  triangle.position.set(196, 59);
+  triangle.angle = -8;
+  bindDebugPointerEvents(triangle, 'triangle');
 
-  g2.beginFill('#0000ff').drawRect(-50, -75, 100, 150).endFill();
-  g2.position.set(112, 72);
-  g2.angle = 15;
-  g2.scale.set(0.65, 0.75);
-  bindDebugPointerEvents(g2, 'g2');
+  hexagon
+    .beginFill('#4a90e2')
+    .lineStyle(2, '#2f5f95', 1)
+    .drawPolygon([0, -27, 23, -13, 23, 13, 0, 27, -23, 13, -23, -13])
+    .endFill();
+  hexagon.position.set(168, 90);
+  bindDebugPointerEvents(hexagon, 'hexagon');
 
-  g3.lineStyle(8, '#ffffff', 1).moveTo(0, 0).lineTo(120, 80);
-  g3.angle = -20;
-  bindDebugPointerEvents(g3, 'g3');
-
-  g4.lineStyle(8, '#ffff00', 1).moveTo(0, 70).lineTo(120, -30);
-  g4.angle = 20;
-  bindDebugPointerEvents(g4, 'g4');
-
-  subContainer.position.set(55, 30);
-  subContainer.addChild(g3, g4);
+  greenRect.beginFill('#a4d46d').drawRect(-22, -16, 44, 32).endFill();
+  greenRect.position.set(159, 60);
+  greenRect.angle = -21;
+  bindDebugPointerEvents(greenRect, 'greenRect');
 
   const sprite = createDemoSprite();
-  mainContainer.addChild(subContainer, g1, g2, sprite);
+  mainContainer.addChild(sprite, line, greenRect, triangle, hexagon);
 
   return mainContainer;
 };
