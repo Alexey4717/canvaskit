@@ -1,0 +1,28 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.button {
+  border: 1px solid #b4a12e;
+  background: #f3d447;
+  color: #18181b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+}
+
+.button:active {
+  transform: translateY(0);
+}
