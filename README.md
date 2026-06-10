@@ -1,117 +1,61 @@
 # CanvasKit + Pixi.js (TypeScript)
 
-Проект на TypeScript для рендера сцены `PIXI.Container` через `Skia (CanvasKit)` с последующим экспортом результата в PDF (векторный формат для графики).
+Легкое одностраничное приложение, которое:
 
----
+- рендерит одну сцену одновременно в `Pixi.js` (canvas) и в `Skia (CanvasKit)`;
+- использует собственную обертку `PIXI.Container -> Skia`;
+- поддерживает `pointerdown`/`pointerup` на обоих канвасах;
+- экспортирует сцену в PDF через Skia PDF backend (если backend доступен в wasm-сборке).
 
-## Запуск проекта
+## Быстрый старт
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Требования
+Открой `http://localhost:3000`.
+
+## Требования
 
 - Node.js 20+
 - npm 10+
 
----
-
 ## Скрипты
 
-- `npm run dev` - запуск локального dev-сервера (Vite)
-- `npm run build` - production сборка
-- `npm run preview` - локальный предпросмотр production сборки
-- `npm run typecheck` - проверка TypeScript типов
-- `npm run lint` - проверка кода ESLint
-- `npm run format` - автоформатирование Prettier
-- `npm run format:check` - проверка форматирования без изменений
+- `npm run dev` — локальная разработка (Vite dev server)
+- `npm run build` — production сборка
+- `npm run preview` — локальный просмотр production-сборки
+- `npm run typecheck` — строгая проверка TS-типов
+- `npm run lint` — ESLint
+- `npm run format` — форматирование Prettier
+- `npm run format:check` — проверка форматирования
 
----
+## Что реализовано
 
-## Цель проекта
+1. **Pixi -> Skia renderer**
+   - обход дерева `PIXI.Container`;
+   - поддержка `PIXI.Graphics` (`drawRect`, `drawShape`, `moveTo/lineTo`) и `PIXI.Sprite`;
+   - учет `translate/rotate/scale` на каждом узле.
 
-Реализовать приложение, которое:
+2. **Интерактивность**
+   - события `pointerdown/pointerup` работают в Pixi-канвасе нативно;
+   - для Skia-канваса реализован hit-test bridge, который эмитит события в Pixi-объекты.
 
-1. Принимает `PIXI.Container` и отрисовывает его через обертку над `Skia`.
-2. Поддерживает базовые типы объектов:
-   - `PIXI.Graphics` (`drawShape`, `moveTo`, `lineTo`, `drawRect`)
-   - `PIXI.Sprite` (png)
-3. Корректно учитывает трансформации (`translate`, `rotate`, `scale`) для дочерних `PIXI.DisplayObject`.
-4. Позволяет экспортировать сцену в PDF через Skia PDF backend:
-   - `Graphics` как вектор
-   - `Sprite` как bitmap (допустимое исключение)
-5. Поддерживает интерактивность (`pointerdown`/`pointerup`) на обоих канвасах.
+3. **UI для тестирования**
+   - кнопка генерации случайной линии/фигуры;
+   - кнопка экспорта в PDF;
+   - одновременный просмотр сцены в двух канвасах.
 
----
+4. **PDF экспорт**
+   - реализован вызов Skia PDF backend через `MakePDFDocument` при наличии в wasm-сборке;
+   - если backend отсутствует, показывается понятная ошибка о необходимости custom wasm сборки.
 
-## Планируемый UI
+## Деплой на Vercel
 
-Минимальный интерфейс на HTML/CSS:
+Проект деплоится как обычный Vite static app:
 
-- область просмотра текущей сцены
-- кнопки управления сценой
-- кнопка экспорта в PDF
+- Build Command: `npm run build`
+- Output Directory: `build`
 
-Для тестирования интерактива:
-
-- генерация случайной фигуры/линии
-- либо переключение между заранее подготовленными контейнерами
-
----
-
-## Архитектура (базовый старт)
-
-```text
-src/
-  app/
-    styles/
-      reset.css
-      app.css
-  config/
-    vite.build.ts
-    vite.resolve.ts
-    vite.server.ts
-  main.ts
-  vite-env.d.ts
-```
-
-Принципы:
-
-- модульная структура
-- типобезопасность (`strict` TypeScript)
-- единый стиль кода через ESLint + Prettier
-- pre-commit проверки через `lint-staged` + Husky
-
----
-
-## Качество кода
-
-Перед коммитом рекомендуется запускать:
-
-```bash
-npm run typecheck
-npm run lint
-npm run build
-```
-
-Это гарантирует, что проект:
-
-- компилируется
-- проходит линтинг
-- корректно собирается в production
-
----
-
-## Статус
-
-Сейчас в репозитории подготовлена инфраструктура:
-
-- Vite + TypeScript baseline
-- разделенные Vite-конфиги
-- базовый UI каркас
-- `reset.css` + `app.css`
-- tooling для линтинга, форматирования и pre-commit
-
-Следующий этап: реализация рендер-обертки Pixi -> Skia, интерактивности и PDF-экспорта.
+`canvaskit.wasm` автоматически бандлится в `build/static`.
