@@ -33,8 +33,7 @@ export const createExportScenePdfHandler = (deps: ExportScenePdfDeps): (() => Pr
       deps.setStatus(`PDF готов: ${exported.fileName} (${Math.ceil(exported.byteLength / 1024)} KB)`, 'success');
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : 'Ошибка экспорта PDF';
-      deps.setStatus(message, 'error');
+      deps.setStatus('Не удалось экспортировать PDF. Повторите попытку.', 'error');
     } finally {
       deps.setBusy(false);
     }
