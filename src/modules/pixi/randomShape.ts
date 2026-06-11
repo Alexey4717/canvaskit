@@ -65,6 +65,7 @@ const makeRandomEllipse = (): PIXI.Graphics => {
   return shape;
 };
 
+/** Создаёт случайную графическую фигуру для пополнения сцены. */
 export const createRandomGraphics = (): PIXI.Graphics => {
   const variant = randomInt(0, 2);
 

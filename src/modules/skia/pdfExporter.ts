@@ -17,6 +17,7 @@ type PdfDocumentMetadata = {
 
 type MakePdfDocument = (metadata: PdfDocumentMetadata) => PdfBackendDocument;
 
+/** Скачивает PDF как файл в браузере без изменения оригинального массива байт. */
 const triggerDownload = (bytes: Uint8Array, fileName: string): void => {
   const portableBytes = Uint8Array.from(bytes);
   const blob = new Blob([portableBytes], { type: 'application/pdf' });
@@ -46,6 +47,10 @@ export const isPdfBackendAvailable = (canvasKit: CanvasKit): boolean => {
   return getPdfBackendFactory(canvasKit) !== null;
 };
 
+/**
+ * Рендерит текущую PIXI-сцену в PDF, сохраняет файл и возвращает метаданные экспорта.
+ * Бросает ошибку, если сборка CanvasKit не содержит MakePDFDocument.
+ */
 export const exportSceneToPdf = (
   canvasKit: CanvasKit,
   container: PIXI.Container,

@@ -58,6 +58,7 @@ const createDemoSprite = (): PIXI.Sprite => {
   return sprite;
 };
 
+/** Формирует стартовую демо-сцену с интерактивными объектами. */
 export const createInitialScene = (): PIXI.Container => {
   const mainContainer = new PIXI.Container();
   const line = new PIXI.Graphics();

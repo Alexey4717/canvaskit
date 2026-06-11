@@ -10,6 +10,7 @@ interface PixiSceneState {
   destroy: () => void;
 }
 
+/** Создаёт и владеет жизненным циклом PIXI-сцены для рабочей области. */
 export const createPixiSceneState = (
   host: HTMLElement,
   width: number,

@@ -26,6 +26,10 @@ const getCanvasKitInit = (): CanvasKitInit => {
   return globalInit as CanvasKitInit;
 };
 
+/**
+ * Инициализирует CanvasKit runtime и Surface один раз (singleton per page load).
+ * Последующие вызовы возвращают тот же Promise с уже созданным runtime.
+ */
 export const loadSkiaRuntime = (
   targetCanvas: HTMLCanvasElement,
   width: number,

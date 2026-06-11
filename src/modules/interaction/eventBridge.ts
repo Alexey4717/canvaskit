@@ -1,26 +1,20 @@
 import * as PIXI from 'pixi.js-legacy';
 
-import { hitTestDisplayTree } from './hitTest';
+import { toCanvasPoint } from './pointerBridge/toCanvasPoint';
+import { hitTestDisplayTree } from './hitTest/hitTestDisplayTree';
 
+/**
+ * Пробрасывает pointer-события со Skia canvas в дерево PIXI.
+ * Возвращает функцию cleanup для корректного снятия подписок.
+ */
 export const bindSkiaPointerBridge = (
   skiaCanvas: HTMLCanvasElement,
   pixiRoot: PIXI.Container,
 ): (() => void) => {
-  const toCanvasPoint = (event: PointerEvent): { x: number; y: number } => {
-    const rect = skiaCanvas.getBoundingClientRect();
-    const scaleX = skiaCanvas.width / rect.width;
-    const scaleY = skiaCanvas.height / rect.height;
-
-    return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY,
-    };
-  };
-
   const emitPointerEvent =
     (type: 'pointerdown' | 'pointerup') =>
     (event: PointerEvent): void => {
-      const point = toCanvasPoint(event);
+      const point = toCanvasPoint(skiaCanvas, event);
       const target = hitTestDisplayTree(pixiRoot, point.x, point.y);
       if (!target) {
         return;
