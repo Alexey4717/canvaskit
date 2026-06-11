@@ -18,6 +18,7 @@ export interface ControlPanelView {
   root: HTMLElement;
   setStatus: (message: string, tone?: StatusTone) => void;
   setBusy: (isBusy: boolean) => void;
+  setControlsDisabled: (isDisabled: boolean) => void;
 }
 
 export const createControlPanel = (actions: ControlPanelActions): ControlPanelView => {
@@ -41,6 +42,13 @@ export const createControlPanel = (actions: ControlPanelActions): ControlPanelVi
   const status = document.createElement('p');
   status.className = [styles.status ?? '', statusClassByTone.neutral].join(' ').trim();
   status.textContent = 'Готово к тестированию';
+  let areControlsDisabled = false;
+  let isExportBusy = false;
+
+  const applyButtonsState = (): void => {
+    generateButton.disabled = areControlsDisabled;
+    exportButton.disabled = areControlsDisabled || isExportBusy;
+  };
 
   const setStatus = (message: string, tone: StatusTone = 'neutral'): void => {
     status.className = [styles.status ?? '', statusClassByTone[tone]].join(' ').trim();
@@ -48,7 +56,13 @@ export const createControlPanel = (actions: ControlPanelActions): ControlPanelVi
   };
 
   const setBusy = (isBusy: boolean): void => {
-    exportButton.disabled = isBusy;
+    isExportBusy = isBusy;
+    applyButtonsState();
+  };
+
+  const setControlsDisabled = (isDisabled: boolean): void => {
+    areControlsDisabled = isDisabled;
+    applyButtonsState();
   };
 
   root.append(generateButton, exportButton, status);
@@ -57,5 +71,6 @@ export const createControlPanel = (actions: ControlPanelActions): ControlPanelVi
     root,
     setStatus,
     setBusy,
+    setControlsDisabled,
   };
 };
