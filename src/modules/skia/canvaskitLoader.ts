@@ -5,16 +5,23 @@ import type { SkiaRuntime } from './types';
 
 let runtimePromise: Promise<SkiaRuntime> | null = null;
 
+const resolveCanvasKitWasmUrl = (): string => {
+  const customUrl = import.meta.env.VITE_CANVASKIT_WASM_URL?.trim();
+
+  return customUrl && customUrl.length > 0 ? customUrl : wasmBinaryUrl;
+};
+
 export const loadSkiaRuntime = (
   targetCanvas: HTMLCanvasElement,
   width: number,
   height: number,
 ): Promise<SkiaRuntime> => {
   if (!runtimePromise) {
+    const resolvedWasmUrl = resolveCanvasKitWasmUrl();
     runtimePromise = CanvasKitInit({
       locateFile: (fileName: string) => {
         if (fileName.endsWith('.wasm')) {
-          return wasmBinaryUrl;
+          return resolvedWasmUrl;
         }
 
         return fileName;

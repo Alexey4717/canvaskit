@@ -29,12 +29,16 @@ const getPdfBackendFactory = (
   return null;
 };
 
+export const isPdfBackendAvailable = (canvasKit: CanvasKit): boolean => {
+  return getPdfBackendFactory(canvasKit) !== null;
+};
+
 export const exportSceneToPdf = (
   canvasKit: CanvasKit,
   container: PIXI.Container,
   width: number,
   height: number,
-): void => {
+): { fileName: string; byteLength: number } => {
   const createPdfDocument = getPdfBackendFactory(canvasKit);
   if (!createPdfDocument) {
     throw new Error(
@@ -52,5 +56,11 @@ export const exportSceneToPdf = (
   const bytes = document.close();
   renderer.dispose();
 
-  triggerDownload(bytes, 'scene-export.pdf');
+  const fileName = `scene-export-${new Date().toISOString().slice(0, 19).replaceAll(':', '-')}.pdf`;
+  triggerDownload(bytes, fileName);
+
+  return {
+    fileName,
+    byteLength: bytes.byteLength,
+  };
 };

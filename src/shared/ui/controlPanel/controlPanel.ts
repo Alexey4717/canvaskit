@@ -5,7 +5,22 @@ export interface ControlPanelActions {
   onExportPdf: () => Promise<void> | void;
 }
 
-export const createControlPanel = (actions: ControlPanelActions): HTMLElement => {
+type StatusTone = 'neutral' | 'success' | 'error' | 'info';
+
+const statusClassByTone: Record<StatusTone, string> = {
+  neutral: styles.statusNeutral ?? '',
+  success: styles.statusSuccess ?? '',
+  error: styles.statusError ?? '',
+  info: styles.statusInfo ?? '',
+};
+
+export interface ControlPanelView {
+  root: HTMLElement;
+  setStatus: (message: string, tone?: StatusTone) => void;
+  setBusy: (isBusy: boolean) => void;
+}
+
+export const createControlPanel = (actions: ControlPanelActions): ControlPanelView => {
   const root = document.createElement('section');
   root.className = styles.root ?? '';
 
@@ -23,7 +38,24 @@ export const createControlPanel = (actions: ControlPanelActions): HTMLElement =>
     void actions.onExportPdf();
   });
 
-  root.append(generateButton, exportButton);
+  const status = document.createElement('p');
+  status.className = [styles.status ?? '', statusClassByTone.neutral].join(' ').trim();
+  status.textContent = 'Готово к тестированию';
 
-  return root;
+  const setStatus = (message: string, tone: StatusTone = 'neutral'): void => {
+    status.className = [styles.status ?? '', statusClassByTone[tone]].join(' ').trim();
+    status.textContent = message;
+  };
+
+  const setBusy = (isBusy: boolean): void => {
+    exportButton.disabled = isBusy;
+  };
+
+  root.append(generateButton, exportButton, status);
+
+  return {
+    root,
+    setStatus,
+    setBusy,
+  };
 };

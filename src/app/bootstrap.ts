@@ -7,7 +7,8 @@ const VIEWPORT_WIDTH = 300;
 const VIEWPORT_HEIGHT = 180;
 
 export const bootstrapApp = async (appRoot: HTMLElement): Promise<() => void> => {
-  const { loadSkiaRuntime, PixiToSkiaRenderer, exportSceneToPdf } = await import('@/modules/skia');
+  const { loadSkiaRuntime, PixiToSkiaRenderer, exportSceneToPdf, isPdfBackendAvailable } =
+    await import('@/modules/skia');
 
   const workspace = createWorkspaceLayout();
   appRoot.appendChild(workspace.root);
@@ -21,6 +22,9 @@ export const bootstrapApp = async (appRoot: HTMLElement): Promise<() => void> =>
 
   const skiaRuntime = await loadSkiaRuntime(skiaCanvas, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   const skiaRenderer = new PixiToSkiaRenderer(skiaRuntime.canvasKit);
+  const hasPdfBackend = isPdfBackendAvailable(skiaRuntime.canvasKit);
+  let setStatus: (message: string, tone?: 'neutral' | 'success' | 'error' | 'info') => void = () => {};
+  let setBusy: (isBusy: boolean) => void = () => {};
 
   const drawSkia = (): void => {
     skiaRenderer.render(pixiScene.sceneRoot, skiaRuntime.canvas);
@@ -36,23 +40,44 @@ export const bootstrapApp = async (appRoot: HTMLElement): Promise<() => void> =>
     onGenerateRandomShape: () => {
       pixiScene.addRandomShape();
       drawSkia();
+      setStatus('Случайный объект добавлен в сцену', 'info');
     },
     onExportPdf: async () => {
+      setBusy(true);
+      setStatus('Экспортируем сцену в PDF...', 'info');
       try {
-        exportSceneToPdf(
+        const exported = exportSceneToPdf(
           skiaRuntime.canvasKit,
           pixiScene.sceneRoot,
           VIEWPORT_WIDTH,
           VIEWPORT_HEIGHT,
         );
+        setStatus(
+          `PDF готов: ${exported.fileName} (${Math.ceil(exported.byteLength / 1024)} KB)`,
+          'success',
+        );
       } catch (error) {
         console.error(error);
-        alert(error instanceof Error ? error.message : 'Ошибка экспорта PDF');
+        const message = error instanceof Error ? error.message : 'Ошибка экспорта PDF';
+        setStatus(message, 'error');
+      } finally {
+        setBusy(false);
       }
     },
   });
+  setStatus = controls.setStatus;
+  setBusy = controls.setBusy;
 
-  workspace.controlsHost.appendChild(controls);
+  if (hasPdfBackend) {
+    setStatus('PDF backend найден. Экспорт доступен.', 'success');
+  } else {
+    setStatus(
+      'PDF backend не найден. Укажите VITE_CANVASKIT_WASM_URL на custom wasm-сборку.',
+      'error',
+    );
+  }
+
+  workspace.controlsHost.appendChild(controls.root);
 
   return () => {
     unbindBridge();

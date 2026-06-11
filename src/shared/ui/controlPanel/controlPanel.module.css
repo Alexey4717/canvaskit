@@ -26,3 +26,33 @@
 .button:active {
   transform: translateY(0);
 }
+
+.button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.status {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 18px;
+}
+
+.statusNeutral {
+  color: #27272a;
+}
+
+.statusSuccess {
+  color: #166534;
+}
+
+.statusError {
+  color: #991b1b;
+}
+
+.statusInfo {
+  color: #1d4ed8;
+}

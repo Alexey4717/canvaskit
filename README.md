@@ -51,6 +51,51 @@ npm run dev
    - реализован вызов Skia PDF backend через `MakePDFDocument` при наличии в wasm-сборке;
    - если backend отсутствует, показывается понятная ошибка о необходимости custom wasm сборки.
 
+## Подключение custom CanvasKit wasm для PDF backend
+
+По умолчанию используется wasm из `canvaskit-wasm/full`. Чтобы гарантировать `MakePDFDocument`,
+используйте свою wasm-сборку CanvasKit с включенным PDF backend.
+
+### 1) Подготовьте wasm-файл
+
+Получите `canvaskit.wasm`, собранный с поддержкой PDF backend (`MakePDFDocument`).
+
+### 2) Положите файл в `public`
+
+Пример:
+
+```text
+public/canvaskit/custom/canvaskit.wasm
+```
+
+### 3) Укажите URL через env
+
+Перед запуском dev/build укажите:
+
+```bash
+VITE_CANVASKIT_WASM_URL=/canvaskit/custom/canvaskit.wasm npm run dev
+```
+
+На Windows (PowerShell):
+
+```powershell
+$env:VITE_CANVASKIT_WASM_URL="/canvaskit/custom/canvaskit.wasm"
+npm run dev
+```
+
+### 4) Проверка, что backend действительно подключен
+
+- В UI появится статус `PDF backend найден. Экспорт доступен.`
+- Кнопка `Экспорт в PDF` должна скачивать файл без ошибки.
+
+## Как проверить, что PDF векторный
+
+1. Сгенерируйте сцену и нажмите `Экспорт в PDF`.
+2. Откройте PDF в viewer и сильно увеличьте масштаб.
+3. Признак векторности:
+   - линии/контуры `PIXI.Graphics` остаются четкими;
+   - `PIXI.Sprite` остается растровым (это ожидаемое исключение по ТЗ).
+
 ## Деплой на Vercel
 
 Проект деплоится как обычный Vite static app:
