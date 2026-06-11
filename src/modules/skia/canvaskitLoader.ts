@@ -3,6 +3,7 @@ import type { CanvasKit } from 'canvaskit-wasm';
 import type { SkiaRuntime } from './types';
 
 let runtimePromise: Promise<SkiaRuntime> | null = null;
+let runtimeCanvas: HTMLCanvasElement | null = null;
 
 const FALLBACK_WASM_URL = '/canvaskit/custom/canvaskit.wasm';
 const ALLOWED_WASM_PATH_PREFIX = '/canvaskit/custom/';
@@ -60,9 +61,20 @@ export const loadSkiaRuntime = (
   width: number,
   height: number,
 ): Promise<SkiaRuntime> => {
+  if (runtimePromise) {
+    if (runtimeCanvas && runtimeCanvas !== targetCanvas) {
+      throw new Error(
+        'CanvasKit runtime уже инициализирован для другого canvas. Используйте один и тот же canvas или добавьте явный reset runtime.',
+      );
+    }
+
+    return runtimePromise;
+  }
+
   if (!runtimePromise) {
     const resolvedWasmUrl = resolveCanvasKitWasmUrl();
     const canvasKitInit = getCanvasKitInit();
+    runtimeCanvas = targetCanvas;
 
     runtimePromise = canvasKitInit({
       locateFile: (fileName: string) => {
@@ -86,6 +98,10 @@ export const loadSkiaRuntime = (
         surface,
         canvas: surface.getCanvas(),
       };
+    }).catch((error: unknown) => {
+      runtimePromise = null;
+      runtimeCanvas = null;
+      throw error;
     });
   }
 

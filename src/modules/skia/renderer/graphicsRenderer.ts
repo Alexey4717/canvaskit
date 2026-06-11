@@ -29,6 +29,36 @@ const createPaint = (
   return paint;
 };
 
+const toStrokeCap = (
+  canvasKit: CanvasKit,
+  cap: unknown,
+): Parameters<Paint['setStrokeCap']>[0] => {
+  const normalizedCap = String(cap).toLowerCase();
+  if (normalizedCap === 'round') {
+    return canvasKit.StrokeCap.Round;
+  }
+  if (normalizedCap === 'square') {
+    return canvasKit.StrokeCap.Square;
+  }
+
+  return canvasKit.StrokeCap.Butt;
+};
+
+const toStrokeJoin = (
+  canvasKit: CanvasKit,
+  join: unknown,
+): Parameters<Paint['setStrokeJoin']>[0] => {
+  const normalizedJoin = String(join).toLowerCase();
+  if (normalizedJoin === 'round') {
+    return canvasKit.StrokeJoin.Round;
+  }
+  if (normalizedJoin === 'bevel') {
+    return canvasKit.StrokeJoin.Bevel;
+  }
+
+  return canvasKit.StrokeJoin.Miter;
+};
+
 const buildPath = (canvasKit: CanvasKit, graphicsData: GraphicsData): Path | null => {
   const pathBuilder = makePathBuilder(canvasKit);
   const { shape } = graphicsData;
@@ -145,6 +175,9 @@ export const renderGraphics = (
     if (lineStyle.visible && lineStyle.width > 0 && lineStyle.alpha > 0) {
       const strokePaint = createPaint(canvasKit, lineStyle.color, lineStyle.alpha * opacity, 'stroke');
       strokePaint.setStrokeWidth(lineStyle.width);
+      strokePaint.setStrokeCap(toStrokeCap(canvasKit, lineStyle.cap));
+      strokePaint.setStrokeJoin(toStrokeJoin(canvasKit, lineStyle.join));
+      strokePaint.setStrokeMiter(lineStyle.miterLimit);
       canvas.drawPath(path, strokePaint);
       strokePaint.delete();
     }

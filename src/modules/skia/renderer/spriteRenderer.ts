@@ -23,18 +23,29 @@ export const renderSprite = (
     imageCache.set(texture.baseTexture.uid, image);
   }
 
-  const width = texture.orig.width;
-  const height = texture.orig.height;
-  const offsetX = -sprite.anchor.x * width;
-  const offsetY = -sprite.anchor.y * height;
+  const sourceFrame = texture.frame;
+  const originalWidth = texture.orig.width;
+  const originalHeight = texture.orig.height;
+  const trim = texture.trim;
+  const destinationX = trim
+    ? trim.x - sprite.anchor.x * originalWidth
+    : -sprite.anchor.x * originalWidth;
+  const destinationY = trim
+    ? trim.y - sprite.anchor.y * originalHeight
+    : -sprite.anchor.y * originalHeight;
+  const destinationWidth = trim ? trim.width : originalWidth;
+  const destinationHeight = trim ? trim.height : originalHeight;
+  if (destinationWidth <= 0 || destinationHeight <= 0) {
+    return;
+  }
 
   const paint = new canvasKit.Paint();
   paint.setAlphaf(opacity);
 
   canvas.drawImageRect(
     image,
-    canvasKit.XYWHRect(0, 0, width, height),
-    canvasKit.XYWHRect(offsetX, offsetY, width, height),
+    canvasKit.XYWHRect(sourceFrame.x, sourceFrame.y, sourceFrame.width, sourceFrame.height),
+    canvasKit.XYWHRect(destinationX, destinationY, destinationWidth, destinationHeight),
     paint,
     false,
   );

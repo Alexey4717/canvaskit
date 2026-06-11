@@ -18,6 +18,14 @@ type ExportScenePdfDeps = {
   setBusy: (isBusy: boolean) => void;
 };
 
+const toErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return 'неизвестная ошибка';
+};
+
 /** Создаёт обработчик экспорта сцены в PDF с единым управлением busy/status состоянием. */
 export const createExportScenePdfHandler = (deps: ExportScenePdfDeps): (() => Promise<void>) => {
   return async () => {
@@ -33,7 +41,7 @@ export const createExportScenePdfHandler = (deps: ExportScenePdfDeps): (() => Pr
       deps.setStatus(`PDF готов: ${exported.fileName} (${Math.ceil(exported.byteLength / 1024)} KB)`, 'success');
     } catch (error) {
       console.error(error);
-      deps.setStatus('Не удалось экспортировать PDF. Повторите попытку.', 'error');
+      deps.setStatus(`Не удалось экспортировать PDF: ${toErrorMessage(error)}.`, 'error');
     } finally {
       deps.setBusy(false);
     }
