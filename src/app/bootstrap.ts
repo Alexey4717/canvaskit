@@ -1,5 +1,5 @@
-import { bindSkiaPointerBridge } from '@/modules/interaction/eventBridge';
-import { createPixiSceneState } from '@/modules/pixi/sceneState';
+import { bindSkiaPointerBridge } from '@/modules/interaction';
+import { createPixiSceneState } from '@/modules/pixi';
 import { createWorkspaceLayout } from '@/shared/ui/canvasWorkspace/canvasWorkspace';
 import { createControlPanel } from '@/shared/ui/controlPanel/controlPanel';
 
@@ -7,11 +7,7 @@ const VIEWPORT_WIDTH = 300;
 const VIEWPORT_HEIGHT = 180;
 
 export const bootstrapApp = async (appRoot: HTMLElement): Promise<() => void> => {
-  const [{ loadSkiaRuntime }, { PixiToSkiaRenderer }, { exportSceneToPdf }] = await Promise.all([
-    import('@/modules/skia/canvaskitLoader'),
-    import('@/modules/skia/pixiToSkiaRenderer'),
-    import('@/modules/skia/pdfExporter'),
-  ]);
+  const { loadSkiaRuntime, PixiToSkiaRenderer, exportSceneToPdf } = await import('@/modules/skia');
 
   const workspace = createWorkspaceLayout();
   appRoot.appendChild(workspace.root);
