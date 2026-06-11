@@ -4,6 +4,19 @@ import type { CanvasKit } from 'canvaskit-wasm';
 import { PixiToSkiaRenderer } from './pixiToSkiaRenderer';
 import type { PdfBackendDocument } from './types';
 
+type PdfDocumentMetadata = {
+  title?: string;
+  author?: string;
+  subject?: string;
+  keywords?: string;
+  creator?: string;
+  producer?: string;
+  language?: string;
+  _rootTag?: number;
+};
+
+type MakePdfDocument = (metadata: PdfDocumentMetadata) => PdfBackendDocument;
+
 const triggerDownload = (bytes: Uint8Array, fileName: string): void => {
   const portableBytes = Uint8Array.from(bytes);
   const blob = new Blob([portableBytes], { type: 'application/pdf' });
@@ -17,9 +30,9 @@ const triggerDownload = (bytes: Uint8Array, fileName: string): void => {
 
 const getPdfBackendFactory = (
   canvasKit: CanvasKit,
-): ((title: string) => PdfBackendDocument) | null => {
+): MakePdfDocument | null => {
   const dynamicKit = canvasKit as CanvasKit & {
-    MakePDFDocument?: (title: string) => PdfBackendDocument;
+    MakePDFDocument?: MakePdfDocument;
   };
 
   if (typeof dynamicKit.MakePDFDocument === 'function') {
@@ -46,14 +59,22 @@ export const exportSceneToPdf = (
     );
   }
 
-  const document = createPdfDocument('Scene Export');
-  const pdfCanvas = document.beginPage(width, height);
+  const metadata: PdfDocumentMetadata = {
+    title: 'Scene Export',
+    creator: 'CanvasKit demo app',
+    producer: 'CanvasKit PDF backend',
+    _rootTag: 0,
+  };
+
+  const pdfDocument = createPdfDocument(metadata);
+
+  const pdfCanvas = pdfDocument.beginPage(width, height);
   const renderer = new PixiToSkiaRenderer(canvasKit);
 
   renderer.render(container, pdfCanvas);
-  document.endPage();
+  pdfDocument.endPage();
 
-  const bytes = document.close();
+  const bytes = pdfDocument.close();
   renderer.dispose();
 
   const fileName = `scene-export-${new Date().toISOString().slice(0, 19).replaceAll(':', '-')}.pdf`;

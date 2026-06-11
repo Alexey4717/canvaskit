@@ -1,5 +1,4 @@
-import CanvasKitInit from 'canvaskit-wasm/full';
-import wasmBinaryUrl from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
+import type { CanvasKit } from 'canvaskit-wasm';
 
 import type { SkiaRuntime } from './types';
 
@@ -7,8 +6,24 @@ let runtimePromise: Promise<SkiaRuntime> | null = null;
 
 const resolveCanvasKitWasmUrl = (): string => {
   const customUrl = import.meta.env.VITE_CANVASKIT_WASM_URL?.trim();
+  const fallbackUrl = '/canvaskit/custom/canvaskit.wasm';
 
-  return customUrl && customUrl.length > 0 ? customUrl : wasmBinaryUrl;
+  return customUrl && customUrl.length > 0 ? customUrl : fallbackUrl;
+};
+
+type CanvasKitInit = (options: {
+  locateFile: (fileName: string) => string;
+}) => Promise<CanvasKit>;
+
+const getCanvasKitInit = (): CanvasKitInit => {
+  const globalInit = (window as Window & { CanvasKitInit?: unknown }).CanvasKitInit;
+  if (typeof globalInit !== 'function') {
+    throw new Error(
+      'CanvasKitInit не найден. Проверьте подключение /canvaskit/custom/canvaskit.js в index.html.',
+    );
+  }
+
+  return globalInit as CanvasKitInit;
 };
 
 export const loadSkiaRuntime = (
@@ -18,7 +33,9 @@ export const loadSkiaRuntime = (
 ): Promise<SkiaRuntime> => {
   if (!runtimePromise) {
     const resolvedWasmUrl = resolveCanvasKitWasmUrl();
-    runtimePromise = CanvasKitInit({
+    const canvasKitInit = getCanvasKitInit();
+
+    runtimePromise = canvasKitInit({
       locateFile: (fileName: string) => {
         if (fileName.endsWith('.wasm')) {
           return resolvedWasmUrl;

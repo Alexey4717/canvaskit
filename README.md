@@ -50,21 +50,34 @@ npm run dev
 4. **PDF экспорт**
    - реализован вызов Skia PDF backend через `MakePDFDocument` при наличии в wasm-сборке;
    - если backend отсутствует, показывается понятная ошибка о необходимости custom wasm сборки.
+   - для текущей кастомной CanvasKit-сборки используется metadata-формат (`title`, `_rootTag`) при создании PDF-документа.
+
+## Кратко: что сделано в проекте
+
+- Реализован рендерер `PIXI.Container -> Skia` с учетом трансформаций и прозрачности.
+- Добавлен bridge событий `pointerdown/pointerup` для Skia-канваса.
+- Настроен экспорт сцены в PDF через кастомный CanvasKit PDF backend.
+- Добавлен UI-статус, показывающий доступность PDF backend и результат экспорта.
 
 ## Подключение custom CanvasKit wasm для PDF backend
 
-По умолчанию используется wasm из `canvaskit-wasm/full`. Чтобы гарантировать `MakePDFDocument`,
-используйте свою wasm-сборку CanvasKit с включенным PDF backend.
+Для корректного PDF экспорта нужна совместимая пара файлов из одной сборки:
+- `canvaskit.js`
+- `canvaskit.wasm`
 
-### 1) Подготовьте wasm-файл
+В проекте используется `public/canvaskit/custom/canvaskit.js` + `public/canvaskit/custom/canvaskit.wasm`.
+Их нельзя смешивать с runtime из другой версии (`npm canvaskit-wasm/full`), иначе возможны runtime-ошибки.
 
-Получите `canvaskit.wasm`, собранный с поддержкой PDF backend (`MakePDFDocument`).
+### 1) Подготовьте `canvaskit.js` и `canvaskit.wasm`
 
-### 2) Положите файл в `public`
+Получите оба файла, собранные с поддержкой PDF backend (`MakePDFDocument`).
+
+### 2) Положите файлы в `public`
 
 Пример:
 
 ```text
+public/canvaskit/custom/canvaskit.js
 public/canvaskit/custom/canvaskit.wasm
 ```
 
